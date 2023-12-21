@@ -1,0 +1,70 @@
+//login //signup
+
+signup: /api/user/register
+login: /api/user/login
+
+check mail: /api/user/checkMail
+check pilot: /api/user/checkPilot
+check company: /api/user/checkCompany
+check center: /api/user/checkCenter
+
+verify email: /api/user/verifyMail/:id/verify/:token
+(access token contains userId and roleId)
+
+//jobs
+
+create job: /api/jobs/createJob
+job listing: /api/jobs/getJobs?page=1  
+job listing Filter: /api/jobs/getFilterJobs?city="bangalore"
+job landing: /api/jobs/jobLanding/:id
+applyJob: /api/jobs/applyJob/:id
+like Job: /api/jobs/likeJob/:id
+unlike Job: /api/jobs/unlikeJob/:id
+close Job : /api/jobs/deleteJob/:id
+edit Job: /api/jobs/editJob/:id
+
+get Applications: /api/jobs/getApplications/:id
+
+
+//pilots
+create Pilot: /api/pilot/registerpilot
+hire pilots: /api/pilot/hirePilots?page=1 filters also
+
+//company
+approved Jobs: /api/jobs/approvedJobs
+pending Jobs: /api/jobs/pendingJobs
+
+//pilotDashboard
+appliedJobs: /api/pilot/getAppliedJobs
+savedJobs: /api/pilot/getSavedJobs
+hiredJobs: /api/pilot/getHiredJobs
+
+//misc Pilot
+get liked Jobs: /api/pilot/getLikedJobs
+get appliedJobs: /api/pilot/getAppliedJobs1
+
+//create Service center
+Create Center: /api/center/registerCenter
+get Center with phoneNo: /api/center/getCenter
+get Center without phoneNo, secondaryNo, whatsappNo: /api/center/getCenterWpn
+
+//reviews of center
+createReview : /api/review/createReview
+writeReview : /api/review/writeReview/:id
+likeReview : /api/review/likeReview
+getReviews : /api/review/getReviews/:id
+
+//company
+createCompanyProfile: /api/company/registerCompany
+getCompany: /api/company/getCompanies
+put On Process: /api/company/putOnProcess
+
+
+//admin
+pendingJobs: /api/admin/getPendingJobs
+activeJobs: /api/admin/getActiveJobs
+To Approve: /api/admin/approve/:id
+To put pending: /api/admin/pending/:id
+
+//save pilot
+save pilot: /api/pilot/savePilot/:id
