@@ -1,7 +1,7 @@
 const express = require("express");
 const multer = require('multer');
 
-const { createpilot, getPilots, hirePilots, hirePilotsFilters, appliedJobs, savedJobs, hiredJobs, likedJobs, getaApliedJobs, singlePilot, pilotLanding, savePilot, getLicensedPilots, getUnlicensedPilots, activatePilot, deactivatePilot, getLikedMedia, getDownloadedMedia, getPilotMedia, getPilotId, getMyProfilePictures, updateBasicInfo, updateProfessionalInfo, updateProfessionalInfo1, savePilot1, appliedJobsMine, pilotFilters, getSuggestions, rearrangeImages, rearrangeVideos, rearrange3d,sendBillingData, updateBillingAddress, checkUserName, similarPilots, updatePilotInfo, updatePilotInfo1, getActivity, viewPilotProfile } = require("../controller/pilotController");
+const { createpilot, getPilots, deactivatedPilots, hirePilots, hirePilotsFilters, appliedJobs, savedJobs, hiredJobs, likedJobs, getaApliedJobs, singlePilot, pilotLanding, savePilot, getLicensedPilots, getUnlicensedPilots, activatePilot, deactivatePilot, getLikedMedia, getDownloadedMedia, getPilotMedia, getPilotId, getMyProfilePictures, updateBasicInfo, updateProfessionalInfo, updateProfessionalInfo1, savePilot1, appliedJobsMine, pilotFilters, getSuggestions, rearrangeImages, rearrangeVideos, rearrange3d,sendBillingData, updateBillingAddress, checkUserName, similarPilots, updatePilotInfo, updatePilotInfo1, getActivity, viewPilotProfile } = require("../controller/pilotController");
 
 
 const paginatedResults1 = require("../middlewares/hirejobPagginator");
@@ -24,6 +24,7 @@ const upload1 = multer({storage}).single('file')
 router.post("/registerpilot",protectPilot, upload1, createpilot);
 router.get("/getPilots", getPilots);
 router.get("/pilotDetails/:id", pilotLanding);
+router.get("/deactivatedPilots/:id", deactivatedPilots);
 
 router.post("/getSinglePilot",protect, singlePilot);
 router.get("/hirePilots", paginatedResults1(Pilot), hirePilots);

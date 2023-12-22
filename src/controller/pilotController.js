@@ -461,6 +461,17 @@ exports.pilotLanding = (req, res) => {
     }
   });
 };
+exports.deactivatedPilots=async(req,res)=>{
+  const id = String(req.params.id);
+  const user=await pilotModel.findOne({ userName: id })
+   if(user?.deactivate) {
+    res.json({destatus:true})
+   }else{
+    res.json({destatus:false})
+   }  
+      
+   
+}
 
 exports.savePilot = async (req, res) => {
   const id = req.params.id;

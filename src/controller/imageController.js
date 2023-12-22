@@ -1303,23 +1303,50 @@ exports.homePage = async (req, res) => {
   console.log("=============================================")
 
 
+  console.log(req.body,'poll')
+  console.log(req.body.data,'data')
 
-  const activeImages = await imageModel.aggregate([
-  {
-    $match: { status: "active" }
-  },
-  {
-    $lookup: {
-      from: "users", // Replace 'users' with the actual name of the user collection
-      localField: "userId",
-      foreignField: "_id",
-      as: "user"
-    }
-  },
-  {
-    $match: { "user.deactivate": { $ne: true } }
-  }
-]);
+
+
+// Image.aggregate([
+//   {
+//     $lookup: {
+//       from: 'users', // Assuming the collection name is 'users'
+//       localField: 'userId',
+//       foreignField: '_id',
+//       as: 'user'
+//     }
+//   },
+//   {
+//     $match: {
+//       'user.deactivate': false
+//     }
+//   }
+// ])
+// .exec((err, filteredImages) => {
+//   if (err) {
+//     // Handle error
+//   } else {
+//     // Process filteredImages
+//     console.log(filteredImages);
+//   }
+// });
+
+
+
+
+
+
+
+const populatedImages = await imageModel.find({ status: 'active' })
+  .populate('userId')
+  .exec();
+
+
+const filteredImages = populatedImages.filter(image => {
+  return image.userId && image.userId.deactivate !==true;
+});
+
 
 
   
@@ -1333,16 +1360,14 @@ exports.homePage = async (req, res) => {
       const endIndex = page * limit;
 
       const results = {};
-
-      if (
-        endIndex <
-        (await imageModel.find({ status: "active" }).countDocuments().exec())
-      ) {
+      const totalResult=filteredImages.length;
+      if(endIndex < totalResult){
         results.next = {
           page: page + 1,
           limit: limit,
         };
       }
+
 
       if (startIndex > 0) {
         results.previous = {
@@ -1350,19 +1375,13 @@ exports.homePage = async (req, res) => {
           limit: limit,
         };
       }
-      imageModel
-        .find({ status: "active" })
-        .limit(limit)
-        .skip(startIndex)
-        .sort({ createdAt: -1 })
-        .exec((err, result) => {
-          if (err) {
-            res.send(err);
-          } else {
-            results.results = result;
-            res.send(results);
-          }
-        });
+      const sortedFilteredImages = filteredImages
+      .sort((a, b) => b.createdAt -a.createdAt);
+      const newImages=sortedFilteredImages.slice(startIndex,startIndex+limit)
+      results.results=newImages
+      res.send(results)
+    
+     
     } else {
       const page = parseInt(req.query.page);
       const limit = 20;
@@ -1416,19 +1435,17 @@ exports.homePage = async (req, res) => {
 
       const results = {};
 
-      if (
-        endIndex <
-        (await imageModel
-          .find({ status: "active" })
-          .sort({ likedCount: -1 })
-          .countDocuments()
-          .exec())
-      ) {
-        results.next = {
-          page: page + 1,
-          limit: limit,
-        };
-      }
+      const sortedFilteredImages = filteredImages
+      .sort((a, b) => b.likedCount - a.likedCount);
+    
+    const totalCount = sortedFilteredImages.length; 
+    if (endIndex < totalCount) {
+      results.next = {
+        page: page + 1,
+        limit: limit,
+      };
+    }
+    
 
       if (startIndex > 0) {
         results.previous = {
@@ -1436,19 +1453,15 @@ exports.homePage = async (req, res) => {
           limit: limit,
         };
       }
-      imageModel
-        .find({ status: "active" })
-        .limit(limit)
-        .skip(startIndex)
-        .sort({ likedCount: -1 })
-        .exec((err, result) => {
-          if (err) {
-            res.send(err);
-          } else {
-            results.results = result;
-            res.send(results);
-          }
-        });
+      const newImages = filteredImages
+      .sort((a, b) => b.likedCount - a.likedCount) 
+      .slice(startIndex, startIndex + limit); 
+    
+      results.results=  newImages
+      res.send(results)
+
+
+
     } else {
       const page = parseInt(req.query.page);
       const limit = 20;
@@ -1503,15 +1516,19 @@ exports.homePage = async (req, res) => {
 
       const results = {};
 
-      if (
-        endIndex <
-        (await imageModel.find({ recommended: true, status: "active" }).countDocuments().exec())
-      ) {
+      const filteredRecommendedImages = filteredImages.filter(image => {
+        return image.recommended === true;
+      });
+      const totalCount = filteredRecommendedImages.length;
+
+      if (endIndex < totalCount) {
         results.next = {
           page: page + 1,
           limit: limit,
         };
       }
+
+     
 
       if (startIndex > 0) {
         results.previous = {
@@ -1519,19 +1536,15 @@ exports.homePage = async (req, res) => {
           limit: limit,
         };
       }
-      imageModel
-        .find({ recommended: true, status: "active" })
-        .limit(limit)
-        .skip(startIndex)
-        .sort({ createdAt: -1 })
-        .exec((err, result) => {
-          if (err) {
-            res.send(err);
-          } else {
-            results.results = result;
-            res.send(results);
-          }
-        });
+      const sortedFilteredRecommendedImages = filteredRecommendedImages
+  .sort((a, b) => b.createdAt - a.createdAt)
+  .slice(startIndex, startIndex + limit);
+
+  
+  results.results=sortedFilteredRecommendedImages
+  res.send(results)
+
+     
     } else {
       const page = parseInt(req.query.page);
       const limit = 20;
@@ -1541,18 +1554,19 @@ exports.homePage = async (req, res) => {
 
       const results = {};
 
-      if (
-        endIndex <
-        (await imageModel
-          .find({ recommended: true, fileType: type })
-          .countDocuments()
-          .exec())
-      ) {
+      const filteredRecommendedImages = filteredImages.filter(image => {
+        return image.recommended === true  && image.fileType==type;
+      });
+      const totalCount = filteredRecommendedImages.length;
+
+      if (endIndex < totalCount) {
         results.next = {
           page: page + 1,
           limit: limit,
         };
       }
+
+     
 
       if (startIndex > 0) {
         results.previous = {
@@ -1560,19 +1574,16 @@ exports.homePage = async (req, res) => {
           limit: limit,
         };
       }
-      imageModel
-        .find({ recommended: true, fileType: type, status: "active" })
-        .limit(limit)
-        .skip(startIndex)
-        .sort({ createdAt: -1 })
-        .exec((err, result) => {
-          if (err) {
-            res.send(err);
-          } else {
-            results.results = result;
-            res.send(results);
-          }
-        });
+
+      const sortedFilteredRecommendedImages = filteredRecommendedImages
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .slice(startIndex, startIndex + limit);
+
+      
+      results.results=sortedFilteredRecommendedImages
+      res.send(results)
+
+     
     }
   }
   if (keyword == "viewed" && !req.body.data) {
@@ -1585,19 +1596,18 @@ exports.homePage = async (req, res) => {
 
       const results = {};
 
-      if (
-        endIndex <
-        (await imageModel
-          .find({ status: "active" })
-          .sort({ views: -1 })
-          .countDocuments()
-          .exec())
-      ) {
-        results.next = {
-          page: page + 1,
-          limit: limit,
-        };
-      }
+      const sortedFilteredImages = filteredImages
+  .sort((a, b) => b.views - a.views); 
+
+   const totalCount=sortedFilteredImages.length
+   if(endIndex<totalCount){
+    results.next = {
+      page: page + 1,
+      limit: limit,
+    };
+   }
+
+
 
       if (startIndex > 0) {
         results.previous = {
@@ -1605,19 +1615,11 @@ exports.homePage = async (req, res) => {
           limit: limit,
         };
       }
-      imageModel
-        .find({ status: "active" })
-        .limit(limit)
-        .skip(startIndex)
-        .sort({ views: -1 })
-        .exec((err, result) => {
-          if (err) {
-            res.send(err);
-          } else {
-            results.results = result;
-            res.send(results);
-          }
-        });
+      const newImages=sortedFilteredImages.slice(startIndex,startIndex + limit)
+      
+      results.results=newImages
+      res.send(results)
+   
     } else {
       const page = parseInt(req.query.page);
       const limit = 20;
@@ -1672,19 +1674,16 @@ exports.homePage = async (req, res) => {
 
       const results = {};
 
-      if (
-        endIndex <
-        (await imageModel
-          .find({ status: "active" })
-          .sort({ commentCount: -1 })
-          .countDocuments()
-          .exec())
-      ) {
+      const sortedFilteredImages = filteredImages
+      .sort((a, b) => b.commentCount - a.commentCount); 
+      const totalResult=sortedFilteredImages.length
+      if(endIndex < totalResult){
         results.next = {
           page: page + 1,
           limit: limit,
         };
       }
+
 
       if (startIndex > 0) {
         results.previous = {
@@ -1692,19 +1691,10 @@ exports.homePage = async (req, res) => {
           limit: limit,
         };
       }
-      imageModel
-        .find({ status: "active" })
-        .limit(limit)
-        .skip(startIndex)
-        .sort({ commentCount: -1 })
-        .exec((err, result) => {
-          if (err) {
-            res.send(err);
-          } else {
-            results.results = result;
-            res.send(results);
-          }
-        });
+      const newImages=sortedFilteredImages.slice(startIndex , startIndex + limit)
+      
+      results.results=newImages
+      res.send(results)
     } else {
       const page = parseInt(req.query.page);
       const limit = 20;
@@ -1759,14 +1749,11 @@ exports.homePage = async (req, res) => {
 
       const results = {};
 
-      if (
-        endIndex <
-        (await imageModel
-          .find({ status: "active" })
-          .sort({ downloadCount: -1 })
-          .countDocuments()
-          .exec())
-      ) {
+      const sortedFilteredImages = filteredImages
+      .sort((a, b) => b.downloadCount - a.downloadCount); 
+
+      const totalResult=sortedFilteredImages.length
+      if(endIndex < totalResult){
         results.next = {
           page: page + 1,
           limit: limit,
@@ -1779,19 +1766,10 @@ exports.homePage = async (req, res) => {
           limit: limit,
         };
       }
-      imageModel
-        .find({ status: "active" })
-        .limit(limit)
-        .skip(startIndex)
-        .sort({ downloadCount: -1 })
-        .exec((err, result) => {
-          if (err) {
-            res.send(err);
-          } else {
-            results.results = result;
-            res.send(results);
-          }
-        });
+      const newImages=sortedFilteredImages.slice(startIndex,startIndex + limit)
+      
+      results.results=newImages
+      res.send(results)
     } else {
       const page = parseInt(req.query.page);
       const limit = 20;
@@ -1851,18 +1829,29 @@ exports.homePage = async (req, res) => {
 
         const results = {};
 
-        if (
-          endIndex <
-          (await imageModel
-            .find({ status: "active", userId: usermain.following })
-            .countDocuments()
-            .exec())
-        ) {
+        const filteredFollowingImages = filteredImages.filter(image => {
+          return image.userId._id==usermain.following;
+        });
+        const totalResult=filteredFollowingImages.length
+        if(endIndex < totalResult){
           results.next = {
             page: page + 1,
             limit: limit,
           };
         }
+
+        // if (
+        //   endIndex <
+        //   (await imageModel
+        //     .find({ status: "active", userId: usermain.following })
+        //     .countDocuments()
+        //     .exec())
+        // ) {
+        //   results.next = {
+        //     page: page + 1,
+        //     limit: limit,
+        //   };
+        // }
 
         if (startIndex > 0) {
           results.previous = {
@@ -1870,18 +1859,11 @@ exports.homePage = async (req, res) => {
             limit: limit,
           };
         }
-        imageModel
-          .find({ status: "active", userId: usermain.following })
-          .limit(limit)
-          .skip(startIndex)
-          .exec((err, result) => {
-            if (err) {
-              res.send(err);
-            } else {
-              results.results = result;
-              res.send(results);
-            }
-          });
+
+       const newImages=filteredFollowingImages.slice(startIndex,startIndex+limit)
+       results.results=newImages
+       res.send(results)
+
       } else {
         const page = parseInt(req.query.page);
         const limit = 20;
