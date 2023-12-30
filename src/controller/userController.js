@@ -106,7 +106,22 @@ exports.loginUser = asyncHandler(async (req, res) => {
     bcrypt.compare(password,user.password).then((match)=>{
       if(match){
           User.findByIdAndUpdate(user._id,{deactivate:false},{new:true,upsert:true}).then((response)=>{
-            pilotModel.findOneAndUpdate({userId:user._id},{deactivate:false},{new:true,upsert:true}).then((response)=>{
+
+             if(response.role=='pilot') {
+
+              pilotModel.findOneAndUpdate({userId:user._id},{deactivate:false},{new:true,upsert:true}).then((response)=>{
+                res.json({
+                  _id: user._id,
+                  email: user.email,
+                  roleId: user.roleId,
+                  role: user.role,
+                  token: generateToken(user._id, user.roleId),
+                  verify: user.verify,
+                
+              })
+              })
+
+             }else{
               res.json({
                 _id: user._id,
                 email: user.email,
@@ -116,7 +131,10 @@ exports.loginUser = asyncHandler(async (req, res) => {
                 verify: user.verify,
               
             })
-            })
+             }
+          
+
+        
           })
         
  

@@ -6,6 +6,7 @@ const mailSend = require("../../utils/mailSend.js");
 const activityModel = require("../models/activityModel");
 
 exports.createComment = async (req, res) => {
+  console.log('oooohoohhoohoh')
   const imageId = req.params.id;
   const user = req.user._id;
   const profilePic = req.user.profilePic;
@@ -24,6 +25,7 @@ exports.createComment = async (req, res) => {
   });
   try {
     const a1 = await _comment.save();
+    console.log(a1,'cmnt')
     res.json(a1);
 
     const image = await imageModel
@@ -192,3 +194,10 @@ exports.getMyUserId = async (req, res) => {
     }
   });
 };
+exports.deleteComment=async(req,res)=>{
+  const {commentId}=req.body
+  console.log(commentId,'deletecmnt')
+  await commentsModel.findOneAndDelete({_id:commentId}).then((response)=>{
+    res.send(response)
+  })
+}

@@ -1,5 +1,6 @@
 const imageModel = require("../models/imageModel");
 const userModel = require("../models/userModel");
+const replyModel=require('../models/replyModel')
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const multer = require("multer");
@@ -334,6 +335,7 @@ exports.getRejected3d = async (req, res) => {
 
 exports.deleteImage = async (req, res) => {
   let id = req.params.id;
+ 
   imageModel.findOne({ _id: id }).exec((err, result) => {
     if (err) {
       res.send(err);
@@ -346,7 +348,9 @@ exports.deleteImage = async (req, res) => {
               console.log(err);
             } else {
               if (result.length !== 0) {
+                console.log('pdpdppdp')
                 console.log("Iam rearranged");
+              
                 let arr = result[0].media;
                 arr = arr.filter((item) => item !== id);
                 rearrangeModel
@@ -361,11 +365,13 @@ exports.deleteImage = async (req, res) => {
                     }
                   });
               }
+              console.log('ddd')
 
               imageModel.findOne({ _id: id }).deleteOne((err, result) => {
                 if (err) {
                   res.send(err);
                 } else {
+                  console.log(result,'po')
                   res.send(result);
                 }
               });
@@ -1233,6 +1239,7 @@ exports.getPreviousPopupImage = async (req, res) => {
 
 exports.imageView = async (req, res) => {
   const id = req.params.id;
+
   let media = ["3d", "image"];
   await imageModel
     .findOne({ slug: id })
@@ -1242,6 +1249,7 @@ exports.imageView = async (req, res) => {
         res.send(err);
       } else {
         if (result) {
+          console.log(result,'popioioi')
           let imageData = result;
           imageModel
             .find({ fileType: media, userId: result.userId })
@@ -1259,8 +1267,13 @@ exports.imageView = async (req, res) => {
                   .exec((err, result2) => {
                     if (err) {
                       res.send(err);
-                    } else {
+                    } else{
+
+
+
+
                       let comments = result2;
+                      
                       let keywords = result.keywords;
                       let category = result.category;
                       keywords.push(category);
@@ -1274,17 +1287,33 @@ exports.imageView = async (req, res) => {
                         ])
                         .limit(8)
                         .sort({ createdAt: -1 })
-                        .exec((err, result3) => {
+                        .exec(async(err, result3) => {
                           if (err) {
                             res.send(err);
                           } else {
                             let relatedImages = result3;
+                            let arr=[]
+                            for (let i = 0; i < comments.length; i++) {
+                              let data = {};
+                              let replies = await replyModel
+                                .find({ commentId: comments[i]._id })
+                                .countDocuments();
+                              data.comment = comments[i];
+                              data.replies = replies;
+                              arr.push(data);
+                            }
+                            console.log(arr);
                             res.send({
                               imageData,
                               otherImages,
-                              comments,
+                              comments: arr,
                               relatedImages,
                             });
+                  
+
+
+
+                        
                           }
                         });
                     }

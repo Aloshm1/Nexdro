@@ -52,6 +52,7 @@ router.post(
   function (req, res) {
    
     const user = req.user._id;
+    console.log(req.body,'ooo')
     
     const {
       centerName,
@@ -87,7 +88,7 @@ router.post(
     let s3bucket = new AWS.S3({
       accessKeyId: process.env.S3_ACCESS_KEY,
       secretAccessKey: process.env.S3_SECRET_ACCESS,
-      Bucket: "nexdro",
+      Bucket: process.env.AWS_BUCKET_NAME,
     });
 
     
@@ -104,7 +105,7 @@ router.post(
           .toBuffer()
           .then((data) => {
             var params = {
-              Bucket: "nexdro",
+              Bucket: process.env.AWS_BUCKET_NAME,
               Key: `serviceCenter/${myFile[0] + ext}${fileType1}`,
               Body: data,
             };
@@ -167,7 +168,7 @@ router.post(
       });
     });
     var mailOptions = {
-      from: 'yaseen.nexevo@gmail.com',
+      from: 'alosh.nexevo@gmail.com',
       to: req.user.email,
       subject: 'Welcome to Nexdro Pilot Network',
       template: 'center',

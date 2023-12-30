@@ -70,6 +70,7 @@ const educationRoutes = require("./routes/educationRoutes");
 const rearrangeRoutes = require("./routes/rearrangeRoutes");
 const complainRoutes = require("./routes/complaintRoutes");
 const eventRoutes = require("./routes/eventRoutes");
+const replyRoutes=require('./routes/replyRoutes')
 //enviroment
 env.config();
 console.log(`mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster0.jxijmw1.mongodb.net/?retryWrites=true&w=majority`)
@@ -128,6 +129,7 @@ app.use("/api/education", educationRoutes);
 app.use("/api/rearrange", rearrangeRoutes);
 app.use("/api/complain", complainRoutes);
 app.use("/api/event", eventRoutes);
+app.use('/api/reply',replyRoutes)
 app.use("/uploads", express.static("uploads"));
 app.use("/profileImages", express.static("profileImages"));
 // app.set("view engine", "ejs");
