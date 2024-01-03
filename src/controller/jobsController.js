@@ -400,7 +400,7 @@ exports.editJob = (req, res) => {
 
 exports.filterJobs = async (req, res) => {
   const { keywords, employeeType, jobType, price, address } = req.body;
-  console.log(req.body);
+  console.log(req.body,'ooohoohohohohoohoho');
   const data = {
     status: "active",
   };
@@ -453,7 +453,7 @@ exports.filterJobs = async (req, res) => {
   }
   //pagination
   console.log(data);
-  const data1 = jobModel
+    jobModel
     .find(data)
     .or([
       { jobTitle: { $regex: keywords, $options: "i" } },

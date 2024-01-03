@@ -64,7 +64,7 @@ exports.registerUser = asyncHandler(async (req, res) => {
       if (a1.token) {
         const url = `${process.env.BASE_URL}/user/${user._id}/verify/${mailToken.token}`;
         var mailOptions = {
-          from: 'no-reply@nexdro.com',
+          from: 'no-repl@nexdro.com',
           to: user.email,
           subject: 'Nexdro Email Verification',
           template: 'register',
@@ -101,11 +101,11 @@ exports.loginUser = asyncHandler(async (req, res) => {
   // Check for user email
   const user = await User.findOne({ email });
   if(user){
-   
+   console.log(user,'oooohoho')
 
     bcrypt.compare(password,user.password).then((match)=>{
       if(match){
-          User.findByIdAndUpdate(user._id,{deactivate:false},{new:true,upsert:true}).then((response)=>{
+          User.findByIdAndUpdate(user._id,{deactivate:false},{new:true}).then((response)=>{
 
              if(response.role=='pilot') {
 
@@ -233,11 +233,11 @@ exports.verifyMail = async (req, res) => {
             message: "No token available",
           });
         } else {
-          await user.updateOne({ verify: true });
+          const newUser=await userModel.findByIdAndUpdate(req.params.id,{verify:true},{new:true});
           res.send({
-            token: generateToken(user._id, user.roleId),
-            role: user.role,
-            verify: user.verify,
+            token: generateToken(newUser._id, newUser.roleId),
+            role: newUser.role,
+            verify: newUser.verify,
           });
         }
       }
@@ -615,7 +615,7 @@ exports.emailResend = async (req, res) => {
   const url = `${process.env.BASE_URL}/user/${user}/verify/${mailToken.token}`;
 
  var mailOptions = {
-    from: 'yaseen.nexevo@gmail.com',
+    from: 'alosh.nexevo@gmail.com',
     to: req.user.email,
     subject: 'Resend - Nexdro Email Verification',
     template: 'emailResend',

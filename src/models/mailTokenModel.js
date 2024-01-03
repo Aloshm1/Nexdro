@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 
 const mailTokenSchema = new mongoose.Schema({

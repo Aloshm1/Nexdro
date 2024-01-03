@@ -15,6 +15,7 @@ exports.createBrand = async (req, res) => {
   };
   
   exports.getBrands = async (req, res) => {
+    console.log('iopgopidiopgfdodfoipfofgoi')
     brandsModel.find({ }).select("brand")
       .sort({ createdAt: -1 })
       .exec((err, result) => {
@@ -49,11 +50,13 @@ exports.createBrand = async (req, res) => {
 };
 
   exports.getOnlyBrands = async (req,res)=>{
+    console.log('resultesdfd')
     brandsModel.find({}).distinct("brand").exec((err,result)=>{
       if(err){
         res.send(err)
       }else{
         res.send(result)
+        console.log(result,'ooopspsp')
       }
     })
   }
